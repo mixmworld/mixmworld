@@ -16,7 +16,7 @@
 #ifndef INCLUDE_MIXMWORLD_H_
 #define INCLUDE_MIXMWORLD_H_
 
-
+#include <stdint.h>
 
 extern char*	mixmworld_get_game_name();
 extern int		mixmworld_set_game_name(const char*);
