@@ -17,6 +17,11 @@
 #define INCLUDE_MIXMWORLD_H_
 
 #include <stdint.h>
+#include "mixmworld_update.h"
+
+
+#define INLINE static inline
+
 
 extern char*	mixmworld_get_game_name();
 extern int		mixmworld_set_game_name(const char*);
