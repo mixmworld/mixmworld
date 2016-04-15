@@ -19,15 +19,22 @@ int test02_clean();
 int	test03();
 int test03_clean();;
 
+int mario_init();
+int mario_sprite_init();;
+
 int test()
 {
 	//return test02();
-	return test03();
+	//return test03();
+	mario_sprite_init();
+	return mario_init();
+	return 0;
 }
 
 int test_clean()
 {
-	__builtin_printf("%s :%s \n",__FILE__,__FUNCTION__);
+	//__builtin_printf("%s :%s \n",__FILE__,__FUNCTION__);
 	//return test02_clean();
-	return test03_clean();
+	//return test03_clean();
+	return 0;
 }

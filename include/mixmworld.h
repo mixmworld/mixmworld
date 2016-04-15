@@ -16,7 +16,8 @@
 #ifndef INCLUDE_MIXMWORLD_H_
 #define INCLUDE_MIXMWORLD_H_
 
-#include <stdint.h>
+#include "mixmworld_types.h"
+#include "mixmworld_collision.h"
 #include "mixmworld_update.h"
 
 
@@ -32,6 +33,9 @@ extern int		mixmworld_set_game_name(const char*);
 //extern int		mixmworld_get_heitht();
 #define mixmworld_get_width()		1280
 #define mixmworld_get_heitht()	720
+
+
+
 
 
 #endif /* INCLUDE_MIXMWORLD_H_ */

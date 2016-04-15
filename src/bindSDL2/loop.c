@@ -20,10 +20,9 @@ static int loop()
 {
 	while(!sdl2_window->quit)
 	{
+		SDL_Event	*e = sdl2_window->event;
 		while(SDL_PollEvent(sdl2_window->event))
 		{
-			SDL_Event	*e = sdl2_window->event;
-
 			//输入事件，假设有多个时，会依次调用这个函数，
 			//
 			if(sdl2_window->mainUpdate){
@@ -38,9 +37,18 @@ static int loop()
 				}
 			}
 
+
 			if(e->type==SDL_QUIT)
 				sdl2_window->quit	=	1;
 				break;
+		}
+		const Uint8* key = SDL_GetKeyboardState(0);
+		if(key[SDL_SCANCODE_LEFT]||
+				key[SDL_SCANCODE_RIGHT]||
+				key[SDL_SCANCODE_UP]||
+				key[SDL_SCANCODE_DOWN]
+			   ){
+			CollisionDetection_input(0,e);
 		}
 
 		//更新函数
@@ -54,6 +62,7 @@ static int loop()
 				}
 			}
 		}
+		CollisionDetection_update(0);
 
 		SDL_RenderClear(sdl2_window->renderer);
 
@@ -70,7 +79,7 @@ static int loop()
 			}
 		}
 
-
+		CollisionDetection_render(0);
 
 		SDL_RenderPresent(sdl2_window->renderer);
 	}

@@ -19,12 +19,7 @@
 #include <mixmworld.h>
 
 
-typedef struct Rect Rect;
 
-
-struct Rect{
-	int32_t x,y,w,h;
-};
 
 
 typedef struct Graphics Graphics;
