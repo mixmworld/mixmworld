@@ -44,7 +44,29 @@ struct CollisionDetectionFPtr{
 	}data;
 	....
 	*/
-	void* 		(*get_user_internal_data)(void*v1);					//提供给mod制作者使用,或者其他功能
+	void* 		(*get_user_internal_data)(void*v1);								//提供给mod制作者使用,或者其他功能
+
+	/*
+	process
+	v1		为碰撞物
+	sender	为触发者.
+	type 	处理类型
+	flg		类型的标志
+
+	type:(可能为以下值)
+		0，为空
+		可以触发v1，死亡
+		可以触发v1, 回避
+		可以触发v1, 恢复
+		....
+	flg: (根据type类型来设置flg)
+
+
+	返回值:
+		未确定的返回值类型(int,float,char*,... etc.)
+
+	*/
+	void*		(*process)(void*v1,void*sender,uint32_t type,uint32_t flg /*, ... */);	//处理事件
 
 	int			(*is_collision_detection)(void*v1);					//当是碰断检测物体，非背景时，才进行碰撞检测
 	int			(*collision_detection)(void*v1,Rect*r);				//碰撞检测函数 ,可以通过 碰撞范围 获得碰撞物体,包括特殊图形构造
