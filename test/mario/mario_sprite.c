@@ -16,6 +16,7 @@
 
 #include <mixmworld.h>
 #include "../../src/graphics.h"
+#include "mario.h"
 
 int mario_sprite_init();
 static int priority();
@@ -73,15 +74,18 @@ static struct{
 	struct{
 		float x,y,w,h;
 	}offset;
+	int strike;
 }status;
 
 enum{
 	status_none,
 	status_jump	=1,
 	status_down	=2,
+	status_strike = 4,
 };
 
-
+static Graphics *weapon = 0;
+static Rect		 weaponRect = {0,0,16,16};
 
 int mario_sprite_init()
 {
@@ -136,6 +140,24 @@ static int render(void*v,void*v2){
 	else{
 		Graphics_Draw_copy(g,rect.x,rect.y);
 	}
+	if(!weapon){
+		weapon = (void*)SDL2Graphics_new("test02c.png");
+	}
+	else{
+		if(status.status&status_strike){
+			weaponRect.y = rect.y + 6;
+			weaponRect.x = rect.x + rect.w;
+			status.strike --;
+			if(status.strike<0){
+				status.status &= ~status_strike;
+			}
+		}
+		else{
+			weaponRect.x = rect.x;
+			weaponRect.y = rect.y - weaponRect.h;
+		}
+		Graphics_Draw_copy(weapon,weaponRect.x,weaponRect.y);
+	}
 	return 0;
 }
 
@@ -172,7 +194,8 @@ static int input(void*v,void*v2,void*e){
 		};
 	}
 	else if(key[SDL_SCANCODE_X]){
-		return 1;
+		status.status |= status_strike;
+		status.strike = 4;
 //		r.y += 6;
 //		kk=2;
 //		value = -1;
@@ -186,7 +209,7 @@ static int input(void*v,void*v2,void*e){
 			if(cc->fptr->collision_detection){
 				if(cc->fptr->collision_detection(cc,&r)>0)
 				{
-					while(cc->fptr->collision_detection(cc,&r)>0){
+					while(cc->fptr->collision_detection(cc,&r)==mario_obstacles){
 						if(kk==1){
 							r.x += value;
 							//__builtin_printf("%s\n",__FUNCTION__);
@@ -220,6 +243,7 @@ static int collision_detection_proc(void*v1){
 	int itr = 0;
 	Rect r = rect;
 
+
 	while((cc=CollisionDetection_iterator(&itr)))
 	{
 		if(cc==(void*)&data)
@@ -249,8 +273,17 @@ static int collision_detection_proc(void*v1){
 				}
 
 
+				int rst;
 
-				if(cc->fptr->collision_detection(cc,&r)<0){
+				if((rst=cc->fptr->collision_detection(cc,&weaponRect))==mario_enemy){
+					if(cc->fptr->process)
+					{
+						cc->fptr->process(cc,v1,mario_enemy_proc_death,0);
+					}
+				}
+
+
+				if((rst=cc->fptr->collision_detection(cc,&r))<0){
 					//没有碰撞物体
 					if(!(status.status&(status_jump|status_down)))
 					{
@@ -259,12 +292,16 @@ static int collision_detection_proc(void*v1){
 					}
 				}
 				else{
+					if(rst==mario_enemy)
+					{
+						r.y = 250;
+					}
 					//有碰撞物
 					if(status.status&status_down)
 					{
 						status.status	&=	(~status_down);
 						status.offset.y		=	0;
-						while((cc->fptr->collision_detection(cc,&r)>0)){
+						while((cc->fptr->collision_detection(cc,&r)==1)){
 							r.y -= 1;
 						}
 					}
@@ -273,12 +310,12 @@ static int collision_detection_proc(void*v1){
 						status.status	&=	(~status_jump);
 						status.status	|=  status_jump;
 						status.offset.y		=	-status.offset.y;
-						while((cc->fptr->collision_detection(cc,&r)>0)){
+						while((cc->fptr->collision_detection(cc,&r)==1)){
 							r.y += 1;
 						}
 					}
 
-					while((cc->fptr->collision_detection(cc,&r)>0)){
+					while((cc->fptr->collision_detection(cc,&r)==1)){
 						r.y -= 1;
 					}
 
