@@ -4,3 +4,6 @@
 Debug/
 Release/
 .settings
+
+#暂时不添加的文件夹
+src/bindLua/*

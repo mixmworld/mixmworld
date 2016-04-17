@@ -68,6 +68,20 @@ static Rect rect={
 		16,32,
 };
 
+static struct{
+	int status;
+	struct{
+		float x,y,w,h;
+	}offset;
+}status;
+
+enum{
+	status_none,
+	status_jump	=1,
+	status_down	=2,
+};
+
+
 
 int mario_sprite_init()
 {
@@ -83,51 +97,6 @@ static int collision_detection(void*v,Rect*r){
 	if(v==&data)
 	{
 		return -1;
-	}
-	static Rect list[] = {
-			{	0,198,
-				256,24,
-			},
-			{
-				34,132,
-				32,16,
-
-			},
-			{
-				82,132,
-				16,16,
-			},
-			{
-				162,164,
-				32,32
-			},
-			{
-				66,68,
-				16,16,
-			},
-	};
-	if(r){
-		Rect *ptr = list;
-		char *end = (char*)list;
-		end += sizeof(list);
-		for(;ptr<(Rect*)end;ptr++)
-		{
-			if(
-					r->x > ptr->x&&
-					r->x+r->w >ptr->x
-					)
-			{
-				continue;
-			}
-			if(
-					r->y>ptr->y&&
-					r->y+r->h>ptr->y
-			)
-			{
-				continue;
-			}
-			return 1;
-		}
 	}
 	return -1;
 }
@@ -182,26 +151,33 @@ static int input(void*v,void*v2,void*e){
 	Rect r = rect;
 	const Uint8* key = SDL_GetKeyboardState(0);
 	if(key[SDL_SCANCODE_RIGHT]){
-		r.x += 6;
+		r.x += 1;
 		//__builtin_printf("%s\n",__FUNCTION__);
 		kk = 1;
 		value = -1;
 	}
 	else if(key[SDL_SCANCODE_LEFT]){
-		r.x -= 6;
+		r.x -= 1;
 		kk=1;
 		value = 1;
 	}
-	else if(key[SDL_SCANCODE_UP]){
-		r.y -= 6;
-		kk=2;
-		value = 1;
+	if(key[SDL_SCANCODE_Z]){
+		if(!(status.status&status_down))
+		{
+			if(!(status.status&status_jump))
+			{
+				status.offset.y = -3.1;
+				status.status   |= status_jump;
+			}
+		};
 	}
-	else if(key[SDL_SCANCODE_DOWN]){
-		r.y += 6;
-		kk=2;
-		value = -1;
+	else if(key[SDL_SCANCODE_X]){
+		return 1;
+//		r.y += 6;
+//		kk=2;
+//		value = -1;
 	}
+
 	while((cc=CollisionDetection_iterator(&itr)))
 	{
 		if(cc==(void*)&data)
@@ -213,7 +189,7 @@ static int input(void*v,void*v2,void*e){
 					while(cc->fptr->collision_detection(cc,&r)>0){
 						if(kk==1){
 							r.x += value;
-							__builtin_printf("%s\n",__FUNCTION__);
+							//__builtin_printf("%s\n",__FUNCTION__);
 						}
 						else if(kk==2){
 							r.y += value;
@@ -242,36 +218,77 @@ static int collision_detection_proc(void*v1){
 	CollisionDetection *cc;
 	int flg = 0;
 	int itr = 0;
-	//rect.y = 200 - rect.h;
 	Rect r = rect;
-	r.y += 7;
 
-//	while((cc=CollisionDetection_iterator(&itr)))
-//	{
-//		if(cc==(void*)&data)
-//			continue;
-//		if(cc->fptr){
-//			if(cc->fptr->collision_detection){
-//				if(cc->fptr->collision_detection(cc,&r)>0)
-//				{
-//					//__builtin_printf("%s\n",__FUNCTION__);
-//					while((cc->fptr->collision_detection(cc,&r)>0))
-//					{
-//						r.y -=1;
-//					}
-//					rect = r;
-//					flg |= 2;
-//				}
-//				else{
-//					flg |= 1;
-//					rect = r;
-//				}
-//			}
-//		}
-//	}
+	while((cc=CollisionDetection_iterator(&itr)))
+	{
+		if(cc==(void*)&data)
+			continue;
+		if(cc->fptr){
+			if(cc->fptr->collision_detection){
 
-//	if(!(flg&0x2)){
-//		rect = r;
-//	}
+
+
+				if(status.status&(status_jump|status_down)){
+					//跳起状态
+					//和落下状态
+					r.y += status.offset.y;
+					status.offset.y += 0.1;
+					if(status.status&status_jump)
+					{
+						if(status.offset.y > 0)
+						{
+							status.status &= ~status_jump;
+							status.status |= status_down;
+						}
+					}
+					else if(status.status&status_down)
+					{
+
+					}
+				}
+
+
+
+				if(cc->fptr->collision_detection(cc,&r)<0){
+					//没有碰撞物体
+					if(!(status.status&(status_jump|status_down)))
+					{
+						status.status 		|= 	status_down;
+						status.offset.y		=	1.0f;
+					}
+				}
+				else{
+					//有碰撞物
+					if(status.status&status_down)
+					{
+						status.status	&=	(~status_down);
+						status.offset.y		=	0;
+						while((cc->fptr->collision_detection(cc,&r)>0)){
+							r.y -= 1;
+						}
+					}
+					else if(status.status&status_jump)
+					{
+						status.status	&=	(~status_jump);
+						status.status	|=  status_jump;
+						status.offset.y		=	-status.offset.y;
+						while((cc->fptr->collision_detection(cc,&r)>0)){
+							r.y += 1;
+						}
+					}
+
+					while((cc->fptr->collision_detection(cc,&r)>0)){
+						r.y -= 1;
+					}
+
+				}
+			}
+		}
+	}
+
+	rect = r;
+
+
 	return 0;
 }

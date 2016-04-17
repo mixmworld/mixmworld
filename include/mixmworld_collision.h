@@ -35,6 +35,16 @@ struct CollisionDetectionFPtr{
 	struct WindowUpdateFPtr* (*get_update_ptr)(void*v1);			//当为NULL，不进行更新,输入，渲染
 	int			(*get_show_priority)(void*v1);						//显示优先权，0为最高优先权
 
+	/*
+	get_user_internal_data函数可以搭配 get_eee来使用
+	或者
+	struct{
+		void* 		r;
+		uint32_t	sign;
+	}data;
+	....
+	*/
+	void* 		(*get_user_internal_data)(void*v1);					//提供给mod制作者使用,或者其他功能
 
 	int			(*is_collision_detection)(void*v1);					//当是碰断检测物体，非背景时，才进行碰撞检测
 	int			(*collision_detection)(void*v1,Rect*r);				//碰撞检测函数 ,可以通过 碰撞范围 获得碰撞物体,包括特殊图形构造

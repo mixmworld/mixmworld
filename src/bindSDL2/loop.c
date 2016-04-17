@@ -46,7 +46,9 @@ static int loop()
 		if(key[SDL_SCANCODE_LEFT]||
 				key[SDL_SCANCODE_RIGHT]||
 				key[SDL_SCANCODE_UP]||
-				key[SDL_SCANCODE_DOWN]
+				key[SDL_SCANCODE_DOWN]||
+				key[SDL_SCANCODE_Z]||
+				key[SDL_SCANCODE_X]
 			   ){
 			CollisionDetection_input(0,e);
 		}
