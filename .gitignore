@@ -7,3 +7,4 @@ Release/
 
 #暂时不添加的文件夹
 src/bindLua/*
+data/

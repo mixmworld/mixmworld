@@ -75,9 +75,15 @@ static Rect enermyRect = {72+16+16+16,199 - 16,16,16};
 static frame_count = 0;
 
 
+#include <mixmworld_music.h>
 int mario_init()
 {
 	CollisionDetection_add((CollisionDetection*)&data);
+	mixm_Music_Init(0);
+	mixm_Music_Set(0,"data/No.23.ogg");
+	mixm_Music_Set(1,"data/Galaxy Train.ogg");
+	mixm_Music_Play(0,1);
+	//mixm_Music_PlayChunk(1);
 	return 0;
 }
 
